@@ -1,0 +1,44 @@
+# Python cache/build
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# Local environment files
+.env
+.env.*
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Local runtime data
+uploads/
+data/
+static/uploads/
+*.db
+*.db-shm
+*.db-wal
+*.pkl
+*.store
+*.bak
+
+# Archives and temporary exports
+*.zip
+*.xlsx
+

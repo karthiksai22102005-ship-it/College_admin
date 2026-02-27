@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>College Faculty Management</title>
+<link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+
+<body>
+
+<!-- ================= TOP BAR ================= -->
+<header class="topbar">
+    <div class="topbar-inner">
+        <div class="topbar-logo">
+            <img src="/static/RCE%20Logo.png" alt="College Logo">
+        </div>
+        <h1>College Faculty Management</h1>
+
+        <div class="top-actions">
+            <span id="roleBadge" class="role-badge">ADMIN</span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+</header>
+
+<main class="main-wrapper">
+
+<!-- ===================================================== -->
+<!-- ================= MAIN DASHBOARD ==================== -->
+<!-- ===================================================== -->
+<section id="mainDashboard" class="page-section active">
+
+    <div class="dashboard-grid">
+
+        <div class="main-card" onclick="openDepartments()">
+            <div class="main-icon">🏫</div>
+            <h2>Departments</h2>
+            <p>Manage faculty by department</p>
+        </div>
+
+        <div class="main-card" onclick="openPersonal()">
+            <div class="main-icon">👤</div>
+            <h2>Personal</h2>
+            <p>Faculty personal records</p>
+        </div>
+
+        <div class="main-card" onclick="openResearch()">
+            <div class="main-icon">🔬</div>
+            <h2>R & D</h2>
+            <p>Publications and research</p>
+        </div>
+
+        <div class="main-card" onclick="openExpertise()">
+            <div class="main-icon">📘</div>
+            <h2>Subject Expertise</h2>
+            <p>Subject mapping</p>
+        </div>
+
+        <div class="main-card" onclick="openInsights()">
+            <div class="main-icon">📊</div>
+            <h2>Insights</h2>
+            <p>Analytics, alerts, and audit logs</p>
+        </div>
+
+    </div>
+</section>
+
+<!-- ===================================================== -->
+<!-- ================= ADVANCED INSIGHTS ================= -->
+<!-- ===================================================== -->
+<section id="insightsSection" class="page-section">
+    <div class="section-header">
+        <button class="back-btn" onclick="goHome()">← Back</button>
+        <h2>Advanced Insights</h2>
+        <button class="small-btn" onclick="loadInsights()">Refresh</button>
+    </div>
+
+    <div id="insightsSummary" class="insights-grid"></div>
+
+    <div class="insights-panels">
+        <div class="profile-card">
+            <div class="card-head">
+                <h3>Admin Notifications</h3>
+            </div>
+            <div id="insightsNotifications">Loading...</div>
+        </div>
+        <div class="profile-card">
+            <div class="card-head">
+                <h3>Audit Logs</h3>
+            </div>
+            <div id="insightsAudit">Loading...</div>
+        </div>
+    </div>
+</section>
+
+<!-- ===================================================== -->
+<!-- ================= DEPARTMENTS ======================= -->
+<!-- ===================================================== -->
+<section id="departmentsSection" class="page-section">
+
+    <div class="section-header">
+        <button class="back-btn" onclick="goHome()">← Back</button>
+        <h2>Departments</h2>
+
+        <input id="deptSearch"
+               class="search-box"
+               placeholder="Search department..."
+               oninput="filterDepartments()">
+    </div>
+
+    <div id="departmentsGrid" class="dashboard-grid"></div>
+</section>
+
+<!-- ===================================================== -->
+<!-- ================= FACULTY LIST ====================== -->
+<!-- ===================================================== -->
+<section id="facultySection" class="page-section">
+
+    <div class="section-header">
+        <button class="back-btn" onclick="backToDepartments()">← Back</button>
+        <h2 id="facultyDeptTitle">Faculty Profiles</h2>
+
+        <input id="facultySearch"
+               class="search-box"
+               placeholder="Search faculty..."
+               oninput="filterFaculty()">
+
+    </div>
+
+    <div id="facultyContainer" class="faculty-grid"></div>
+</section>
+
+<!-- ===================================================== -->
+<!-- ================= PERSONAL MODULE =================== -->
+<!-- ===================================================== -->
+<section id="personalSection" class="page-section">
+    <div class="section-header">
+        <button class="back-btn" onclick="goHome()">← Back</button>
+        <h2>Personal Document Manager</h2>
+        <input id="personalFacultySearch"
+               class="search-box"
+               placeholder="Search by name or ID..."
+               oninput="filterPersonalFaculty()">
+    </div>
+    <div id="personalFacultyListContainer">
+        <!-- Faculty list will be rendered here by JS -->
+    </div>
+</section>
+
+<!-- Personal Docs Modal -->
+<div id="personalDocsModal" class="modal-section">
+    <div class="modal-overlay" onclick="closePersonalDocsModal()"></div>
+    <div class="modal-content large">
+        <div class="modal-header">
+            <h2 id="personalDocsTitle">Manage Personal Documents</h2>
+            <button class="close-btn" onclick="closePersonalDocsModal()">×</button>
+        </div>
+        <div id="personalDocsBody" class="modal-body">
+            <!-- Document cards will be rendered here by JS -->
+        </div>
+    </div>
+</div>
+
+<!-- Qualification Docs Modal -->
+<div id="qualificationDocsModal" class="modal-section">
+    <div class="modal-overlay" onclick="closeQualificationDocsModal()"></div>
+    <div class="modal-content large">
+        <div class="modal-header">
+            <h2 id="qualificationDocsTitle">Manage Qualification Documents</h2>
+            <button class="close-btn" onclick="closeQualificationDocsModal()">×</button>
+        </div>
+        <div id="qualificationDocsBody" class="modal-body">
+            <!-- Qualification document cards rendered by JS -->
+        </div>
+    </div>
+</div>
+
+
+<!-- ===================================================== -->
+<!-- ================= RESEARCH & DEVELOPMENT =========== -->
+<!-- ===================================================== -->
+<section id="researchSection" class="page-section">
+    <!-- This will be a two-part view: list and detail -->
+    <div id="researchListView">
+        <div class="section-header">
+            <button class="back-btn" onclick="goHome()">← Back</button>
+            <h2>R&D - Faculty List</h2>
+            <input id="researchFacultySearch"
+                   class="search-box"
+                   placeholder="Search by name or ID..."
+                   oninput="filterResearchFaculty()">
+        </div>
+        <div id="researchFacultyListContainer">
+            <!-- Faculty list for R&D module will be rendered here -->
+        </div>
+    </div>
+
+    <div id="researchDetailView" class="hidden">
+        <div class="section-header">
+            <button class="back-btn" onclick="backToResearchList()">← Back to List</button>
+            <h2 id="researchDetailTitle">R&D Assets</h2>
+        </div>
+        <div id="researchDetailBody">
+            <!-- Certifications, Books, etc. will be rendered here -->
+        </div>
+    </div>
+</section>
+
+<!-- Certification Modal -->
+<div id="certificationModal" class="modal-section">
+    <div class="modal-overlay" onclick="closeCertificationModal()"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="certificationModalTitle">Add Certification</h2>
+            <button class="close-btn" onclick="closeCertificationModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="certEditId">
+            <div class="input-group">
+                <label for="certTitle">Certification Title *</label>
+                <input type="text" id="certTitle" placeholder="e.g., AWS Certified Cloud Practitioner">
+            </div>
+            <div class="input-group">
+                <label for="certIssuer">Issuer *</label>
+                <input type="text" id="certIssuer" placeholder="e.g., Amazon Web Services">
+            </div>
+            <div class="input-group">
+                <label for="certYear">Year *</label>
+                <input type="number" id="certYear" placeholder="e.g., 2024">
+            </div>
+            <div class="input-group">
+                <label for="certFile">Certificate File (PDF, JPG, PNG) *</label>
+                <input type="file" id="certFile" accept=".pdf,.jpg,.jpeg,.png">
+                <p id="certFileStatus" class="file-status-info"></p>
+            </div>
+            <div class="modal-buttons">
+                <button class="primary-btn" onclick="saveCertification()">Save Certification</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Book Modal -->
+<div id="bookModal" class="modal-section">
+    <div class="modal-overlay" onclick="closeBookModal()"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="bookModalTitle">Add Book</h2>
+            <button class="close-btn" onclick="closeBookModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="bookEditId">
+            <div class="input-group">
+                <label for="bookTitle">Book Title *</label>
+                <input type="text" id="bookTitle">
+            </div>
+            <div class="input-group">
+                <label for="bookAuthor">Author</label>
+                <input type="text" id="bookAuthor">
+            </div>
+            <div class="input-group">
+                <label for="bookPublisher">Publisher</label>
+                <input type="text" id="bookPublisher">
+            </div>
+            <div class="input-group">
+                <label for="bookYear">Year</label>
+                <input type="number" id="bookYear">
+            </div>
+            <div class="input-group">
+                <label for="bookFile">Document (PDF/DOC/DOCX)</label>
+                <input type="file" id="bookFile" accept=".pdf,.doc,.docx">
+            </div>
+            <div class="modal-buttons">
+                <button class="primary-btn" onclick="saveBook()">Save Book</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Paper Modal -->
+<div id="paperModal" class="modal-section">
+    <div class="modal-overlay" onclick="closePaperModal()"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="paperModalTitle">Add Research Paper</h2>
+            <button class="close-btn" onclick="closePaperModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="paperEditId">
+            <div class="input-group">
+                <label for="paperTitle">Paper Title *</label>
+                <input type="text" id="paperTitle">
+            </div>
+            <div class="input-group">
+                <label for="paperJournal">Journal / Conference</label>
+                <input type="text" id="paperJournal">
+            </div>
+            <div class="input-group">
+                <label for="paperYear">Year</label>
+                <input type="number" id="paperYear">
+            </div>
+            <div class="input-group">
+                <label for="paperDoi">DOI / Link</label>
+                <input type="text" id="paperDoi">
+            </div>
+            <div class="input-group">
+                <label for="paperFile">Document (PDF/DOC/DOCX)</label>
+                <input type="file" id="paperFile" accept=".pdf,.doc,.docx">
+            </div>
+            <div class="modal-buttons">
+                <button class="primary-btn" onclick="savePaper()">Save Paper</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- ===================================================== -->
+<!-- ================= SUBJECT EXPERTISE ================== -->
+<!-- ===================================================== -->
+<section id="expertiseSection" class="page-section">
+    <div class="section-header">
+        <button class="back-btn" onclick="goHome()">? Back</button>
+        <h2>Subject Expertise Manager</h2>
+        <input id="expertiseFacultySearch"
+               class="search-box"
+               placeholder="Search by name or ID..."
+               oninput="filterExpertiseFaculty()">
+    </div>
+    <div id="expertiseFacultyListContainer"></div>
+</section>
+
+<div id="expertiseManagerModal" class="modal-section">
+    <div class="modal-overlay" onclick="closeExpertiseManagerModal()"></div>
+    <div class="modal-content large">
+        <div class="modal-header">
+            <h2 id="expertiseManagerTitle">Subject Expertise</h2>
+            <button class="close-btn" onclick="closeExpertiseManagerModal()">×</button>
+        </div>
+        <div id="expertiseManagerBody" class="modal-body"></div>
+    </div>
+</div>
+
+<!-- ===================================================== -->
+<!-- ================= FACULTY PROFILE =================== -->
+<!-- ===================================================== -->
+<section id="profileSection" class="page-section">
+
+    <div class="section-header">
+        <button class="back-btn" onclick="backToFaculty()">Back</button>
+        <h2>Faculty Profile</h2>
+
+        <div id="profileCompletion" class="completion-badge">
+            0% Complete
+        </div>
+    </div>
+
+    <div class="profile-layout">
+
+        <!-- ================= LEFT PANEL ================= -->
+        <div class="profile-left">
+
+            <!-- PHOTO -->
+            <div class="photo-box">
+                <img id="profilePhoto"
+                     src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20128%20128%27%3E%3Cdefs%3E%3CradialGradient%20id%3D%27g%27%20cx%3D%2735%25%27%20cy%3D%2730%25%27%20r%3D%2785%25%27%3E%3Cstop%20offset%3D%270%25%27%20stop-color%3D%27%23fff7ed%27/%3E%3Cstop%20offset%3D%27100%25%27%20stop-color%3D%27%23ffedd5%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect%20width%3D%27128%27%20height%3D%27128%27%20rx%3D%2764%27%20fill%3D%27url(%23g)%27/%3E%3Cpath%20d%3D%27M64%2068c-14.4%200-26%2011.6-26%2026v6h52v-6c0-14.4-11.6-26-26-26z%27%20fill%3D%27%23fdba74%27/%3E%3Ccircle%20cx%3D%2764%27%20cy%3D%2746%27%20r%3D%2718%27%20fill%3D%27%23fb923c%27/%3E%3C/svg%3E"
+                     alt="Faculty photo"
+                     loading="lazy"
+                     onerror="this.onerror=null;this.src=this.getAttribute('data-fallback');"
+                     data-fallback="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20128%20128%27%3E%3Cdefs%3E%3CradialGradient%20id%3D%27g%27%20cx%3D%2735%25%27%20cy%3D%2730%25%27%20r%3D%2785%25%27%3E%3Cstop%20offset%3D%270%25%27%20stop-color%3D%27%23fff7ed%27/%3E%3Cstop%20offset%3D%27100%25%27%20stop-color%3D%27%23ffedd5%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect%20width%3D%27128%27%20height%3D%27128%27%20rx%3D%2764%27%20fill%3D%27url(%23g)%27/%3E%3Cpath%20d%3D%27M64%2068c-14.4%200-26%2011.6-26%2026v6h52v-6c0-14.4-11.6-26-26-26z%27%20fill%3D%27%23fdba74%27/%3E%3Ccircle%20cx%3D%2764%27%20cy%3D%2746%27%20r%3D%2718%27%20fill%3D%27%23fb923c%27/%3E%3C/svg%3E">
+
+                <input type="file" id="photoUpload" hidden accept=".png,.jpg,.jpeg,.gif">
+
+                <button class="small-btn admin-only"
+                        onclick="triggerPhotoUpload()">
+                    Change Photo
+                </button>
+
+                <button class="small-btn admin-only"
+                        style="margin-top:8px; background:#dc2626; color:#fff;"
+                        onclick="removeProfilePhoto()">
+                    Remove Photo
+                </button>
+            </div>
+
+            <div class="profile-panel-head">
+                <div class="profile-title">Identity</div>
+                <div class="profile-subtitle">Core details and contact</div>
+            </div>
+
+            <!-- BASIC INFO -->
+            <div class="profile-field">
+                <label class="profile-label" for="profileName">Full Name</label>
+                <input id="profileName" class="profile-input admin-edit" placeholder="Faculty Name" readonly>
+            </div>
+
+            <div class="profile-field-row">
+                <div class="profile-field">
+                    <label class="profile-label" for="profileFacultyId">Faculty ID</label>
+                    <input id="profileFacultyId" class="profile-input" placeholder="Faculty ID" readonly>
+                </div>
+                <div class="profile-field">
+                    <label class="profile-label" for="profileDept">Department</label>
+                    <input id="profileDept" class="profile-input" placeholder="Department" readonly>
+                </div>
+            </div>
+
+            <div class="profile-field">
+                <label class="profile-label" for="profileDesignation">Designation</label>
+                <input id="profileDesignation" class="profile-input admin-edit" placeholder="Designation" readonly>
+            </div>
+
+            <div class="profile-field">
+                <label class="profile-label" for="profileNormalizedRole">Normalized Role</label>
+                <input id="profileNormalizedRole" class="profile-input admin-edit" placeholder="HOD / ASSOC_PROF / ASST_PROF / STAFF" readonly>
+            </div>
+
+            <div class="profile-panel-divider"></div>
+
+            <div class="profile-panel-head">
+                <div class="profile-title">Contact</div>
+                <div class="profile-subtitle">Where to reach this faculty</div>
+            </div>
+
+            <div class="profile-field">
+                <label class="profile-label" for="profileEmail">Email</label>
+                <input id="profileEmail" class="profile-input admin-edit" placeholder="Email" readonly>
+            </div>
+
+            <div class="profile-field">
+                <label class="profile-label" for="profilePhone">Phone</label>
+                <input id="profilePhone" class="profile-input admin-edit" placeholder="Phone" readonly>
+            </div>
+
+            <div class="profile-panel-divider"></div>
+
+            <div class="profile-panel-head">
+                <div class="profile-title">Credentials</div>
+                <div class="profile-subtitle">Login details (admin only)</div>
+            </div>
+
+            <div class="profile-field">
+                <label class="profile-label" for="profileUsername">Username</label>
+                <input id="profileUsername" class="profile-input admin-edit" placeholder="Login Username" readonly>
+            </div>
+
+            <div class="profile-field">
+                <label class="profile-label" for="profilePassword">Password</label>
+                <input id="profilePassword" type="password" class="profile-input admin-edit" placeholder="Set new password (optional)" autocomplete="new-password" readonly>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="profile-actions">
+                <button class="primary-btn admin-only" onclick="enableEdit()">Edit Profile</button>
+                <button class="success-btn admin-only hidden" onclick="saveProfile()">Save Changes</button>
+            </div>
+
+        </div>
+
+        <!-- ================= RIGHT PANEL ================= -->
+        <div class="profile-right">
+
+            <!-- ===== QUALIFICATIONS ===== -->
+            <div class="profile-card">
+
+                <div class="card-head">
+                    <h3>Qualifications</h3>
+                </div>
+
+                <div id="qualificationList">-</div>
+            </div>
+
+            <!-- ===== SUBJECT EXPERTISE ===== -->
+            <div class="profile-card">
+
+                <div class="card-head">
+                    <h3>Subject Expertise</h3>
+                </div>
+
+                <div id="expertiseList">-</div>
+            </div>
+
+            <!-- ===== PUBLICATIONS ===== -->
+            <div class="profile-card">
+
+                <div class="card-head">
+                    <h3>Publications</h3>
+                </div>
+
+                <div id="publicationList">-</div>
+            </div>
+
+            <!-- ===== DOCUMENTS QUICK VIEW ===== -->
+            <div class="profile-card">
+                <h3>Documents</h3>
+                <div id="documentList">-</div>
+            </div>
+
+            <!-- ===== ACCESS CONTROL ===== -->
+            <div class="profile-card">
+                <div class="card-head">
+                    <h3>Access Control</h3>
+                </div>
+                <div class="profile-field">
+                    <label class="profile-label">Account Status</label>
+                    <input id="profileAccountLockState" class="profile-input" value="-" readonly>
+                </div>
+            </div>
+
+            <!-- ===== ADMIN FIELDS ===== -->
+            <div class="profile-card">
+                <div class="card-head">
+                    <h3>Admin Notes</h3>
+                </div>
+                <div class="profile-field">
+                    <label class="profile-label" for="profileOfficeRoom">Office / Room</label>
+                    <input id="profileOfficeRoom" class="profile-input admin-edit" placeholder="e.g., Block A - Room 204" readonly>
+                </div>
+                <div class="profile-field">
+                    <label class="profile-label" for="profileExtension">Extension</label>
+                    <input id="profileExtension" class="profile-input admin-edit" placeholder="e.g., 214" readonly>
+                </div>
+                <div class="profile-field" style="margin-bottom:0;">
+                    <label class="profile-label" for="profileAdminNotes">Notes</label>
+                    <textarea id="profileAdminNotes" class="profile-input admin-edit" placeholder="Internal notes for admin…" rows="4" readonly></textarea>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ===================================================== -->
+<!-- ================= QUALIFICATION EDITOR ============== -->
+<!-- ===================================================== -->
+<section id="qualificationEditorSection" class="page-section modal-section">
+    <div class="modal-overlay" onclick="closeQualificationEditor()"></div>
+    <div class="modal-content">
+        <h2>Add Qualification</h2>
+        
+        <div class="input-group">
+            <label>Qualification Type</label>
+            <select id="qualType">
+                <option value="SSC">SSC</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="B.Tech">B.Tech</option>
+                <option value="PhD">PhD</option>
+                <option value="MBA">MBA</option>
+                <option value="MCA">MCA</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Year (Optional)</label>
+            <input type="number" id="qualYear" placeholder="2020">
+        </div>
+
+        <div class="input-group">
+            <label>Upload Document</label>
+            <input type="file" id="qualDoc" accept=".pdf,.png,.jpg,.jpeg">
+        </div>
+
+        <div class="modal-buttons">
+            <button class="primary-btn" onclick="saveQualification()">Save</button>
+            <button class="cancel-btn" onclick="closeQualificationEditor()">Cancel</button>
+        </div>
+    </div>
+</section>
+
+<!-- ===================================================== -->
+<!-- ================= PUBLICATION EDITOR =============== -->
+<!-- ===================================================== -->
+<section id="publicationEditorSection" class="page-section modal-section">
+    <div class="modal-overlay" onclick="closePublicationEditor()"></div>
+    <div class="modal-content">
+        <h2>Add Publication</h2>
+        
+        <div class="input-group">
+            <label>Publication Type</label>
+            <select id="pubType">
+                <option value="ORCID">ORCID</option>
+                <option value="Scopus">Scopus</option>
+                <option value="ResearchGate">ResearchGate</option>
+                <option value="Books">Books</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Details/Link</label>
+            <textarea id="pubDetails" placeholder="Details or link..." style="height:80px;"></textarea>
+        </div>
+
+        <div class="modal-buttons">
+            <button class="primary-btn" onclick="savePublication()">Save</button>
+            <button class="cancel-btn" onclick="closePublicationEditor()">Cancel</button>
+        </div>
+    </div>
+</section>
+
+<!-- ===================================================== -->
+<!-- ================= CREATE FACULTY ==================== -->
+<!-- ===================================================== -->
+<section id="createFacultySection" class="page-section">
+
+    <div class="section-header">
+        <button class="back-btn" onclick="backToFaculty()">← Back</button>
+        <h2>Create Faculty Profile</h2>
+    </div>
+
+    <div class="create-layout">
+
+        <!-- ================= LEFT - BASIC INFO ================= -->
+        <div class="form-card">
+            <h3>Basic Information *</h3>
+
+            <div class="input-group">
+                <label>Full Name *</label>
+                <input type="text" id="facName" placeholder="Faculty Name">
+            </div>
+
+            <div class="input-group">
+                <label>Department *</label>
+                <input type="text" id="facDept" readonly placeholder="Auto-filled">
+            </div>
+
+            <div class="input-group">
+                <label>Designation *</label>
+                <input type="text" id="facDesignation" placeholder="e.g., Professor, Assistant Professor">
+            </div>
+
+            <div class="input-group">
+                <label>Email *</label>
+                <input type="email" id="facEmail" placeholder="faculty@college.edu">
+            </div>
+
+            <div class="input-group">
+                <label>Phone *</label>
+                <input type="tel" id="facPhone" placeholder="9876543210">
+            </div>
+        </div>
+
+        <!-- ================= MIDDLE - LOGIN & PHOTO ================= -->
+        <div class="form-card">
+            <h3>Initial Login Credentials</h3>
+
+            <div class="input-group">
+                <label>Username (Optional)</label>
+                <input type="text" id="facUsername" placeholder="Leave blank for auto-assign (Faculty ID)">
+            </div>
+
+            <div class="input-group">
+                <label>Password (Optional)</label>
+                <input type="password" id="facPassword" placeholder="Leave blank for auto-assign (Faculty ID)">
+            </div>
+
+            <h3 style="margin-top:20px;">Profile Photo</h3>
+
+            <div class="photo-upload-box">
+                <img id="facPhotoPreview" src="/static/default-user.png" alt="photo">
+                <input type="file" id="facPhotoUpload" accept="image/*" onchange="previewPhoto()">
+                <button class="upload-btn" type="button" onclick="document.getElementById('facPhotoUpload').click()">
+                    📷 Upload Photo
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= RIGHT - QUALIFICATIONS ================= -->
+        <div class="form-card">
+            <h3>Qualifications</h3>
+
+            <div id="facQualifications" class="dynamic-list">
+                <p style="color: #9ca3af;">No qualifications added</p>
+            </div>
+
+            <button type="button" class="small-btn" onclick="openFacQualForm()">
+                + Add Qualification
+            </button>
+
+            <!-- Qualification Form (Hidden) -->
+            <div id="facQualForm" style="display:none; margin-top:12px; padding:12px; background:#f9fafb; border-radius:8px;">
+                <select id="facQualType" style="width:100%; margin-bottom:8px; padding:8px; border-radius:6px; border:1px solid #d1d5db;">
+                    <option value="">Select Type</option>
+                    <option value="SSC">SSC</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="B.Tech">B.Tech</option>
+                    <option value="PhD">PhD</option>
+                    <option value="MBA">MBA</option>
+                    <option value="MCA">MCA</option>
+                </select>
+
+                <input type="number" id="facQualYear" placeholder="Year" style="width:100%; margin-bottom:8px; padding:8px; border-radius:6px; border:1px solid #d1d5db;">
+
+                <div style="display:flex; gap:6px;">
+                    <button type="button" class="small-btn" onclick="addFacQual()" style="flex:1; background:#16a34a; color:white;">Save</button>
+                    <button type="button" class="small-btn" onclick="closeFacQualForm()" style="flex:1;">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="create-layout" style="margin-top:24px;">
+
+        <!-- ================= EXPERTISE ================= -->
+        <div class="form-card">
+            <h3>Subject Expertise</h3>
+
+            <div id="facExpertise" class="dynamic-list">
+                <p style="color: #9ca3af;">No subjects added</p>
+            </div>
+
+            <button type="button" class="small-btn" onclick="openFacExpertiseForm()">
+                + Add Subject
+            </button>
+
+            <div id="facExpertiseForm" style="display:none; margin-top:12px;">
+                <input type="text" id="facExpertiseInput" placeholder="e.g., Data Science, Web Development" 
+                       style="width:100%; margin-bottom:8px; padding:8px; border-radius:6px; border:1px solid #d1d5db;">
+                <div style="display:flex; gap:6px;">
+                    <button type="button" class="small-btn" onclick="addFacExpertise()" style="flex:1; background:#16a34a; color:white;">Add</button>
+                    <button type="button" class="small-btn" onclick="closeFacExpertiseForm()" style="flex:1;">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PUBLICATIONS ================= -->
+        <div class="form-card">
+            <h3>Publications</h3>
+
+            <div id="facPublications" class="dynamic-list">
+                <p style="color: #9ca3af;">No publications added</p>
+            </div>
+
+            <button type="button" class="small-btn" onclick="openFacPublicationForm()">
+                + Add Publication
+            </button>
+
+            <div id="facPublicationForm" style="display:none; margin-top:12px;">
+                <select id="facPubType" style="width:100%; margin-bottom:8px; padding:8px; border-radius:6px; border:1px solid #d1d5db;">
+                    <option value="">Select Type</option>
+                    <option value="ORCID">ORCID</option>
+                    <option value="Scopus">Scopus</option>
+                    <option value="ResearchGate">ResearchGate</option>
+                    <option value="Books">Books</option>
+                    <option value="Other">Other</option>
+                </select>
+
+                <textarea id="facPubDetails" placeholder="Details/Link" style="width:100%; height:60px; margin-bottom:8px; padding:8px; border-radius:6px; border:1px solid #d1d5db;"></textarea>
+
+                <div style="display:flex; gap:6px;">
+                    <button type="button" class="small-btn" onclick="addFacPublication()" style="flex:1; background:#16a34a; color:white;">Add</button>
+                    <button type="button" class="small-btn" onclick="closeFacPublicationForm()" style="flex:1;">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SAVE BUTTON -->
+    <div style="text-align:center; margin:24px 0;">
+        <button class="primary-btn" onclick="saveFacultyFull()" style="max-width:400px; margin:0 auto;">
+            ✓ Create Faculty Profile
+        </button>
+    </div>
+
+</section>
+
+</main>
+
+<script src="/static/js/dashboard.js?v=20260227a"></script>
+
+<!-- Admin profile photo lightbox -->
+<div id="adminPhotoLightbox" class="ad-lightbox" aria-hidden="true">
+    <div class="ad-lightbox-overlay" data-close="1"></div>
+    <div class="ad-lightbox-panel" role="dialog" aria-modal="true" aria-label="Profile photo preview">
+        <button type="button" class="ad-lightbox-close" data-close="1" aria-label="Close photo preview">×</button>
+        <img id="adminPhotoLightboxImg" class="ad-lightbox-img" alt="Profile photo preview">
+    </div>
+</div>
+</body>
+</html>

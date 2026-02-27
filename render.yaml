@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: college-admin
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: DB_BACKEND
+        value: postgres
+      - key: SESSION_COOKIE_SECURE
+        value: "true"
+      - key: SESSION_COOKIE_SAMESITE
+        value: Lax
+      - key: ALLOW_LEGACY_ADMIN_LOGIN
+        value: "false"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: college-admin-db
+          property: connectionString
+
+databases:
+  - name: college-admin-db
+    databaseName: college_admin
+    user: college_admin_user
+    plan: free

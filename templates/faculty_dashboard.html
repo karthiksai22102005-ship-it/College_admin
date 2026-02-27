@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Dashboard</title>
+    <link rel="stylesheet" href="/static/css/faculty_dashboard.css?v=20260227e">
+</head>
+<body>
+    <header class="fd-topbar">
+        <div class="fd-brand">
+            <img src="/static/RCE%20Logo.png" alt="College Logo">
+            <div>
+                <h1>Faculty Dashboard</h1>
+                <p>Personal Workspace</p>
+            </div>
+        </div>
+        <div class="fd-topbar-actions">
+            <span id="facultyRoleBadge" class="role-badge">{{ faculty.get('normalized_role') or 'STAFF' }}</span>
+            <button class="fd-btn fd-btn-soft" type="button" id="refreshDashboardBtn">Refresh</button>
+            {% if impersonated_by_admin %}
+            <button class="fd-btn fd-btn-soft" type="button" onclick="stopAdminImpersonation()">Back To Admin</button>
+            {% endif %}
+            <button class="fd-logout" type="button" onclick="logoutFaculty()">Logout</button>
+        </div>
+    </header>
+
+    <main class="fd-page">
+        {% if impersonated_by_admin %}
+        <section class="fd-card" style="margin-bottom:16px; border:1px solid #f59e0b; background:#fffbeb;">
+            <strong>Admin Impersonation Mode:</strong> You are viewing this faculty dashboard as admin for debugging.
+        </section>
+        {% endif %}
+        <section class="fd-kpi-grid" aria-label="Overview">
+            <article class="fd-kpi-card">
+                <p>Profile Completion</p>
+                <h3 id="kpiProfileCompletion">0%</h3>
+            </article>
+            <article class="fd-kpi-card">
+                <p>Documents Uploaded</p>
+                <h3 id="kpiDocumentsUploaded">0 / 10</h3>
+            </article>
+            <article class="fd-kpi-card">
+                <p>Publications</p>
+                <h3 id="kpiPublications">{{ (faculty.get('publications') or []) | length }}</h3>
+            </article>
+            <article class="fd-kpi-card">
+                <p>Last Login (UTC)</p>
+                <h3 id="kpiLastLogin">{{ faculty.get('last_login') or '-' }}</h3>
+            </article>
+        </section>
+
+        <section class="fd-main" aria-label="Dashboard content">
+            <div class="fd-main-content">
+                <div class="fd-col fd-col-left">
+                    <section class="fd-card fd-profile-header">
+                        <div class="fd-photo-wrap">
+                            <img id="facultyPhotoPreview" src="{{ faculty.get('photo') or '/static/default-user.png' }}" alt="Faculty Photo">
+                        </div>
+                        <div class="fd-header-meta">
+                            <h2 id="facultyNameHeader">{{ faculty.get('name', '-') }}</h2>
+                            <p><strong>Authority:</strong> <span id="facultyHeaderRole">{{ faculty.get('normalized_role') or faculty.get('role') or 'STAFF' }}</span></p>
+                            <p><strong>Department:</strong> <span id="facultyDepartmentHeader">{{ faculty.get('department', '-') }}</span></p>
+                            <p><strong>Designation:</strong> <span id="facultyDesignationHeader">{{ faculty.get('designation', '-') }}</span></p>
+                        </div>
+                    </section>
+
+                    <section class="fd-card">
+                        <h3>Profile</h3>
+                        <form id="facultyProfileForm" autocomplete="on">
+                            <div class="fd-grid">
+                                <label for="facultyName">Name</label>
+                                <input type="text" id="facultyName" value="{{ faculty.get('name', '') }}" readonly aria-readonly="true" autocomplete="name">
+
+                                <label for="facultyDepartment">Department</label>
+                                <input type="text" id="facultyDepartment" value="{{ faculty.get('department', '') }}" readonly aria-readonly="true">
+
+                                <label for="facultyUsername">Username</label>
+                                <input type="text" id="facultyUsername" value="{{ faculty.get('username', '') }}" readonly aria-readonly="true" autocomplete="username">
+
+                                <label for="facultyEmail">Email</label>
+                                <input type="email" id="facultyEmail" value="{{ faculty.get('email', '') }}" autocomplete="email" inputmode="email">
+
+                                <label for="facultyPhone">Phone</label>
+                                <input type="text" id="facultyPhone" value="{{ faculty.get('phone', '') }}" autocomplete="tel" inputmode="tel" placeholder="e.g., 9876543210" maxlength="15" pattern="[0-9]{10,15}" title="Enter 10 to 15 digits">
+
+                                <label for="facultyDesignation">Designation</label>
+                                <input type="text" id="facultyDesignation" value="{{ faculty.get('designation', '') }}" readonly aria-readonly="true" autocomplete="organization-title">
+                            </div>
+                            <div class="fd-actions">
+                                <button class="fd-btn" type="submit">Save Profile</button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <section class="fd-card">
+                        <h3>Profile Photo</h3>
+                        <div class="fd-photo-actions">
+                            <div class="fd-photo-hint">Choose a photo (PNG/JPG/GIF)</div>
+                            <input type="file" id="facultyPhotoInput" accept=".png,.jpg,.jpeg,.gif" aria-label="Choose profile photo">
+                            <button class="fd-btn" id="uploadPhotoBtn" type="button">Upload Photo</button>
+                            <button class="fd-btn fd-btn-danger" id="removePhotoBtn" type="button">Remove Photo</button>
+                        </div>
+                    </section>
+
+                    <section class="fd-card">
+                        <h3>Security</h3>
+                        <form id="facultyPasswordForm">
+                            <div class="fd-grid">
+                                <label for="currentPassword">Current Password</label>
+                                <div class="fd-password-wrap">
+                                    <input type="password" id="currentPassword" required autocomplete="current-password">
+                                    <button type="button" class="fd-password-toggle" data-target="currentPassword" aria-label="Show password">&#128065;</button>
+                                </div>
+
+                                <label for="newPassword">New Password</label>
+                                <div class="fd-password-wrap">
+                                    <input type="password" id="newPassword" required autocomplete="new-password" aria-describedby="passwordHelp">
+                                    <button type="button" class="fd-password-toggle" data-target="newPassword" aria-label="Show password">&#128065;</button>
+                                </div>
+                            </div>
+                            <small class="fd-help-text" id="passwordHelp">Use at least 8 characters with uppercase, lowercase, number, and special character.</small>
+                            <div class="fd-actions">
+                                <button class="fd-btn" type="submit">Update Password</button>
+                            </div>
+                        </form>
+                    </section>
+                </div>
+
+                <div class="fd-col fd-col-right">
+                    <section class="fd-card" id="workloadCard">
+                        <h3>Workload</h3>
+                        <p><strong>Hours per week:</strong> <span id="workloadHours">{{ faculty.get('workload', {}).get('hours_per_week', 0) }}</span></p>
+                        <div id="workloadSubjects" class="fd-tag-list">
+                            {% set subjects = faculty.get('workload', {}).get('subjects', []) %}
+                            {% if subjects %}
+                                {% for subject in subjects %}
+                                    <span class="fd-tag">{{ subject }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span class="fd-empty">No subjects assigned</span>
+                            {% endif %}
+                        </div>
+                        <ul id="assignmentList" class="fd-note-list">
+                            <li class="fd-empty">No assignments yet</li>
+                        </ul>
+                    </section>
+
+                    <section class="fd-card" id="roleWorkspaceCard">
+                        <h3>Role Workspace</h3>
+                        <p id="roleWorkspaceDescription" class="fd-empty">Loading role capabilities...</p>
+                        <ul id="roleQuickActions" class="fd-note-list"></ul>
+                    </section>
+
+                    <section class="fd-card" id="roleFeatureCardsCard">
+                        <h3>Role Feature Cards</h3>
+                        <div id="roleFeatureCards" class="fd-feature-grid">
+                            <div class="fd-empty">Loading role features...</div>
+                        </div>
+                    </section>
+
+                    <section class="fd-card" id="hodControlsCard" style="display:none;">
+                        <h3>HOD Controls</h3>
+                        <div class="fd-hod-stats">
+                            <div class="fd-hod-stat"><span>Pending Approvals</span><strong id="hodPendingCount">0</strong></div>
+                            <div class="fd-hod-stat"><span>Faculty Assignments</span><strong id="hodAssignCount">0</strong></div>
+                            <div class="fd-hod-stat"><span>Materials Shared</span><strong id="hodMaterialCount">0</strong></div>
+                        </div>
+                        <div class="fd-actions" style="justify-content:flex-start; flex-wrap:wrap;">
+                            <button class="fd-btn fd-btn-soft" type="button" onclick="scrollToCard('leaveCard')">Leave Approvals</button>
+                            <button class="fd-btn fd-btn-soft" type="button" onclick="scrollToCard('academicOpsCard')">Attendance & Marks</button>
+                            <button class="fd-btn fd-btn-soft" type="button" onclick="notifyHodFeature('Subject Allocation')">Subject Allocation</button>
+                            <button class="fd-btn fd-btn-soft" type="button" onclick="notifyHodFeature('Timetable Control')">Timetable Control</button>
+                            <button class="fd-btn fd-btn-soft" type="button" onclick="notifyHodFeature('Department Reports')">Export Reports</button>
+                        </div>
+                    </section>
+
+                    <section class="fd-card" id="leaveCard">
+                        <h3>Leave Management</h3>
+                        <form id="leaveApplyForm">
+                            <div class="fd-grid">
+                                <label for="leaveFromDate">From</label>
+                                <input type="date" id="leaveFromDate" required>
+                                <label for="leaveToDate">To</label>
+                                <input type="date" id="leaveToDate" required>
+                                <label for="leaveReason">Reason</label>
+                                <input type="text" id="leaveReason" placeholder="Reason" required>
+                            </div>
+                            <div class="fd-actions">
+                                <button class="fd-btn" type="submit">Apply Leave</button>
+                            </div>
+                        </form>
+                        <ul id="myLeaveList" class="fd-note-list"><li class="fd-empty">No leave records</li></ul>
+                        <div id="hodLeaveApprovalWrap" style="display:none;">
+                            <h4>Pending Approvals (HOD)</h4>
+                            <ul id="hodPendingLeaveList" class="fd-note-list"><li class="fd-empty">No pending approvals</li></ul>
+                        </div>
+                    </section>
+
+                    <section class="fd-card" id="academicOpsCard">
+                        <h3>Academic Operations</h3>
+                        <form id="attendanceForm">
+                            <div class="fd-grid">
+                                <label for="attSubject">Subject</label>
+                                <input id="attSubject" type="text" placeholder="Subject">
+                                <label for="attSection">Section</label>
+                                <input id="attSection" type="text" placeholder="Section">
+                                <label for="attDate">Date</label>
+                                <input id="attDate" type="date">
+                                <label for="attPeriod">Period</label>
+                                <input id="attPeriod" type="text" placeholder="P1 / P2">
+                            </div>
+                            <div class="fd-actions"><button class="fd-btn" type="submit">Mark Attendance</button></div>
+                        </form>
+                        <form id="marksForm">
+                            <div class="fd-grid">
+                                <label for="markRollNo">Student Roll No</label>
+                                <input id="markRollNo" type="text" placeholder="Roll No">
+                                <label for="markSubject">Subject</label>
+                                <input id="markSubject" type="text" placeholder="Subject">
+                                <label for="markExamType">Exam Type</label>
+                                <input id="markExamType" type="text" placeholder="Internal-1">
+                                <label for="markObtained">Marks</label>
+                                <input id="markObtained" type="number" min="0" step="0.1">
+                                <label for="markMax">Max Marks</label>
+                                <input id="markMax" type="number" min="0" step="0.1">
+                            </div>
+                            <div class="fd-actions"><button class="fd-btn" type="submit">Submit Marks</button></div>
+                        </form>
+                    </section>
+
+                    <section class="fd-card" id="materialsCard">
+                        <h3>Study Materials</h3>
+                        <form id="materialUploadForm" enctype="multipart/form-data">
+                            <div class="fd-grid">
+                                <label for="materialTitle">Title</label>
+                                <input id="materialTitle" type="text" placeholder="Material title">
+                                <label for="materialSubject">Subject</label>
+                                <input id="materialSubject" type="text" placeholder="Subject">
+                                <label for="materialSection">Section</label>
+                                <input id="materialSection" type="text" placeholder="Section">
+                                <label for="materialAcademicYear">Academic Year</label>
+                                <input id="materialAcademicYear" type="text" placeholder="2025-26">
+                                <label for="materialDescription">Description</label>
+                                <input id="materialDescription" type="text" placeholder="Short description">
+                                <label for="materialFile">File</label>
+                                <input id="materialFile" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.txt">
+                            </div>
+                            <div class="fd-actions"><button class="fd-btn" type="submit">Upload Material</button></div>
+                        </form>
+                        <ul id="materialList" class="fd-note-list"><li class="fd-empty">No materials uploaded</li></ul>
+                    </section>
+
+                    <section class="fd-card" id="publicationCard">
+                        <h3>Publications</h3>
+                        <label for="publicationSearch" class="fd-sr-only">Search publications</label>
+                        <input type="text" id="publicationSearch" placeholder="Search publications..." class="fd-search-input" autocomplete="off">
+                        <ul id="publicationsList" class="fd-pub-list">
+                            {% set pubs = faculty.get('publications', []) %}
+                            {% if pubs %}
+                                {% for pub in pubs %}
+                                    {% if pub is mapping %}
+                                        <li>{{ pub.get('title') or pub.get('details') or pub.get('type') or '-' }}</li>
+                                    {% else %}
+                                        <li>{{ pub }}</li>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <li class="fd-empty">No publications added</li>
+                            {% endif %}
+                        </ul>
+
+                        <form id="publicationForm">
+                            <label for="publicationInput" class="fd-sr-only">Add publication</label>
+                            <textarea id="publicationInput" rows="3" placeholder="Enter publication details" maxlength="2000"></textarea>
+                            <div class="fd-actions">
+                                <button class="fd-btn" type="submit">Add Publication</button>
+                            </div>
+                        </form>
+                    </section>
+
+                </div>
+            </div>
+
+            <section class="fd-common-grid">
+                <section class="fd-card" id="tasksCard">
+                    <h3>Assigned Tasks</h3>
+                    <ul id="taskList" class="fd-note-list"><li class="fd-empty">No assigned tasks</li></ul>
+                </section>
+
+                <section class="fd-card fd-card-wide" id="notificationsCard">
+                    <h3>Notifications Center</h3>
+                    <div class="fd-inline-actions">
+                        <label class="fd-check"><input type="checkbox" id="notificationsUnreadOnly"> Unread only</label>
+                        <button class="fd-btn fd-btn-soft" type="button" id="refreshNotificationsBtn">Reload</button>
+                    </div>
+                    <ul id="facultyNotificationsList" class="fd-note-list" aria-label="Notifications list">
+                        <li class="fd-empty">No notifications</li>
+                    </ul>
+                </section>
+            </section>
+        </section>
+    </main>
+
+    <div id="photoLightbox" class="fd-lightbox" aria-hidden="true">
+        <div class="fd-lightbox-overlay" data-close="1"></div>
+        <div class="fd-lightbox-panel" role="dialog" aria-modal="true" aria-label="Profile photo preview">
+            <button type="button" class="fd-lightbox-close" data-close="1" aria-label="Close photo preview">&times;</button>
+            <img id="photoLightboxImg" class="fd-lightbox-img" alt="Profile photo preview">
+        </div>
+    </div>
+
+    <div id="toastContainer" class="fd-toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <script>
+        window.FACULTY_BOOTSTRAP = {{ faculty | tojson }};
+    </script>
+    <script src="/static/js/faculty_dashboard.js?v=20260227e"></script>
+</body>
+</html>

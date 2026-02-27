@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Admin Login</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/login.css">
+
+    <!-- Google Font (structure only, styling later) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- ===== Forgot Password Modal ===== -->
+    <div id="forgotModal" style="
+        position:fixed;
+        inset:0;
+        background:rgba(0,0,0,0.4);
+        display:none;
+        align-items:center;
+        justify-content:center;
+        z-index:999;
+    ">
+        <div style="background:white; padding:24px; border-radius:10px; width:320px;">
+            <h3 style="margin-bottom:12px;">Reset Password</h3>
+
+            <input type="text" id="resetUserId"
+                   placeholder="Enter your User ID"
+                   style="width:100%; padding:8px; margin-bottom:10px;">
+
+            <select id="resetRole" style="width:100%; padding:8px; margin-bottom:10px;">
+                <option value="faculty" selected>Faculty</option>
+                <option value="admin">Admin</option>
+            </select>
+
+            <input type="text" id="resetDob"
+                   placeholder="Enter DOB (DD-MM-YYYY) for faculty"
+                   style="width:100%; padding:8px; margin-bottom:10px;">
+
+            <div class="modal-password-field" style="margin-bottom:10px;">
+                <input type="password" id="newPassword"
+                       placeholder="Enter new password"
+                       style="width:100%; padding:8px; padding-right:34px;">
+                <button type="button" class="modal-password-toggle" id="toggleResetPassword" aria-label="Show password">&#128065;</button>
+            </div>
+
+            <div style="display:flex; gap:8px;">
+                <button class="login-btn" style="flex:1;" onclick="resetPassword()">
+                    Reset
+                </button>
+                <button class="small-btn" style="flex:1;" onclick="closeForgotModal()">
+                    Cancel
+                </button>
+            </div>
+
+            <div id="resetMsg" style="margin-top:8px; font-size:0.85rem;"></div>
+        </div>
+    </div>
+
+    <!-- ===== Main Wrapper ===== -->
+    <main class="auth-wrapper">
+
+        <!-- ===== Background Layer ===== -->
+        <div class="auth-bg"></div>
+
+        <!-- ===== Login Card Container ===== -->
+        <section class="auth-container">
+            <!-- Left Visual Panel (hidden on small screens) -->
+            <div class="auth-visual">
+                <img src="/static/RCE logo.png" alt="Login Visual" class="visual-image">
+                <div class="visual-content">
+                    <h1 class="brand-title">AcharyaAnusandha</h1>
+                    <p class="brand-subtitle">
+                       
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right Form Panel -->
+            <div class="auth-form-panel">
+
+                <div class="form-box">
+
+                    <header class="form-header">
+                        <h2>Sign In</h2>
+                        <p>Enter your credentials to continue</p>
+                    </header>
+
+                    <!-- ===== Login Form ===== -->
+                    <form id="loginForm" onsubmit="event.preventDefault(); login();">
+
+                        <!-- User ID -->
+                        <div class="input-group">
+                            <label for="user_id">User ID</label>
+                            <input
+                                type="text"
+                                id="user_id"
+                                name="user_id"
+                                placeholder="Enter your user ID"
+                                required
+                                autocomplete="username"
+                            >
+                        </div>
+
+                        <!-- Password -->
+                        <div class="input-group">
+                            <label for="password">Password</label>
+                            <div class="password-field">
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    placeholder="Enter your password"
+                                    required
+                                    autocomplete="current-password"
+                                >
+                                <button type="button" class="password-toggle" id="togglePassword" aria-label="Show password">&#128065;</button>
+                            </div>
+                        </div>
+
+                        <!-- Error Message -->
+                        <div class="error-box">
+                            <span id="error-msg"></span>
+                        </div>
+
+                        <!-- Submit -->
+                        <button type="submit" class="login-btn">
+                            <span>Login</span>
+                        </button>
+                        <!-- Forgot password link -->
+                        <div style="text-align:right; margin-top:10px;">
+                            <a href="#" id="forgotLink" style="font-size:0.9rem; color:#ea580c;">
+                                Forgot password?
+                            </a>
+                        </div>
+
+                    </form>
+
+                    <!-- Footer -->
+                    <footer class="form-footer">
+                        <p>Secure Faculty Access</p>
+                    </footer>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- JS -->
+    <script src="/static/js/login.js"></script>
+
+</body>
+</html>

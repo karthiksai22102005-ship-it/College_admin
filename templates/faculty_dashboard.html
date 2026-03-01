@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faculty Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/faculty_dashboard.css') }}?v=20260301f">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/faculty_dashboard.css') }}?v=20260301g">
 </head>
 <body class="fd-shell">
     <aside class="fd-shell-sidebar">
@@ -65,7 +65,7 @@
 
         <section class="fd-layout-grid">
             <div class="fd-layout-main">
-                <section class="fd-card" id="plannerCard">
+                <section class="fd-card" id="plannerCard" data-module="overview">
                     <h3>Daily Planner</h3>
                     <div class="fd-planner-head">
                         <div>
@@ -91,14 +91,14 @@
                     </ul>
                 </section>
 
-                <section class="fd-card" id="roleFeatureCardsCard">
+                <section class="fd-card" id="roleFeatureCardsCard" data-module="overview">
                     <h3>Role Feature Cards</h3>
                     <div id="roleFeatureCards" class="fd-feature-grid">
                         <div class="fd-empty">Loading role features...</div>
                     </div>
                 </section>
 
-                <section class="fd-card" id="workloadCard">
+                <section class="fd-card" id="workloadCard" data-module="workload">
                     <h3>Workload</h3>
                     <p><strong>Hours per week:</strong> <span id="workloadHours">{{ faculty.get('workload', {}).get('hours_per_week', 0) }}</span></p>
                     <div id="workloadSubjects" class="fd-tag-list">
@@ -116,7 +116,7 @@
                     </ul>
                 </section>
 
-                <section class="fd-card" id="academicOpsCard">
+                <section class="fd-card" id="academicOpsCard" data-module="academic">
                     <h3>Academic Operations</h3>
                     <form id="attendanceForm">
                         <div class="fd-grid">
@@ -148,7 +148,7 @@
                     </form>
                 </section>
 
-                <section class="fd-card" id="materialsCard">
+                <section class="fd-card" id="materialsCard" data-module="materials">
                     <h3>Study Materials</h3>
                     <form id="materialUploadForm" enctype="multipart/form-data">
                         <div class="fd-grid">
@@ -170,7 +170,7 @@
                     <ul id="materialList" class="fd-note-list"><li class="fd-empty">No materials uploaded</li></ul>
                 </section>
 
-                <section class="fd-card" id="leaveCard">
+                <section class="fd-card" id="leaveCard" data-module="leave">
                     <h3>Leave Management</h3>
                     <form id="leaveApplyForm">
                         <div class="fd-grid">
@@ -190,7 +190,7 @@
                     </div>
                 </section>
 
-                <section class="fd-card" id="publicationCard">
+                <section class="fd-card" id="publicationCard" data-module="publications">
                     <h3>Publications</h3>
                     <label for="publicationSearch" class="fd-sr-only">Search publications</label>
                     <input type="text" id="publicationSearch" placeholder="Search publications..." class="fd-search-input" autocomplete="off">
@@ -219,7 +219,7 @@
             </div>
 
             <aside class="fd-layout-side">
-                <section class="fd-card fd-profile-header">
+                <section class="fd-card fd-profile-header" id="profileCard" data-module="profile">
                     <div class="fd-photo-wrap">
                         <img id="facultyPhotoPreview" src="{{ faculty.get('photo') or url_for('static', filename='default-user.png') }}" alt="Faculty Photo">
                     </div>
@@ -230,7 +230,7 @@
                     </div>
                 </section>
 
-                <section class="fd-card">
+                <section class="fd-card" id="profileDetailsCard" data-module="profile">
                     <h3>Profile</h3>
                     <form id="facultyProfileForm" autocomplete="on">
                         <div class="fd-grid">
@@ -251,7 +251,7 @@
                     </form>
                 </section>
 
-                <section class="fd-card">
+                <section class="fd-card" id="profilePhotoCard" data-module="profile">
                     <h3>Profile Photo</h3>
                     <div class="fd-photo-actions">
                         <div class="fd-photo-hint">Choose a photo (PNG/JPG/GIF)</div>
@@ -261,7 +261,7 @@
                     </div>
                 </section>
 
-                <section class="fd-card">
+                <section class="fd-card" id="profileSecurityCard" data-module="profile">
                     <h3>Security</h3>
                     <form id="facultyPasswordForm">
                         <div class="fd-grid">
@@ -281,19 +281,19 @@
                     </form>
                 </section>
 
-                <section class="fd-card" id="roleWorkspaceCard">
+                <section class="fd-card" id="roleWorkspaceCard" data-module="overview">
                     <h3>Role Workspace</h3>
                     <p id="roleWorkspaceDescription" class="fd-empty">Loading role capabilities...</p>
                     <ul id="roleQuickActions" class="fd-note-list"></ul>
                     <ul id="priorityAlertsList" class="fd-note-list"></ul>
                 </section>
 
-                <section class="fd-card" id="tasksCard">
+                <section class="fd-card" id="tasksCard" data-module="tasks">
                     <h3>Assigned Tasks</h3>
                     <ul id="taskList" class="fd-note-list"><li class="fd-empty">No assigned tasks</li></ul>
                 </section>
 
-                <section class="fd-card fd-card-wide" id="notificationsCard">
+                <section class="fd-card fd-card-wide" id="notificationsCard" data-module="notifications">
                     <h3>Notifications Center</h3>
                     <div class="fd-inline-actions">
                         <label class="fd-check"><input type="checkbox" id="notificationsUnreadOnly"> Unread only</label>
@@ -304,7 +304,7 @@
                     </ul>
                 </section>
 
-                <section class="fd-card" id="hodControlsCard" style="display:none;">
+                <section class="fd-card" id="hodControlsCard" style="display:none;" data-module="hod">
                     <h3>HOD Controls</h3>
                     <div class="fd-hod-stats">
                         <div class="fd-hod-stat"><span>Pending Approvals</span><strong id="hodPendingCount">0</strong></div>
@@ -336,6 +336,6 @@
     <script>
         window.FACULTY_BOOTSTRAP = {{ faculty | tojson }};
     </script>
-    <script src="{{ url_for('static', filename='js/faculty_dashboard.js') }}?v=20260301f"></script>
+    <script src="{{ url_for('static', filename='js/faculty_dashboard.js') }}?v=20260301g"></script>
 </body>
 </html>

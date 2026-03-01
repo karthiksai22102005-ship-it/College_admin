@@ -1,6 +1,7 @@
 
 let FACULTY_DATA = window.FACULTY_BOOTSTRAP || {};
 let PLANNER_SESSION_STARTED_AT = Date.now();
+let ACTIVE_MODULE = null;
 
 const REQUIRED_PROFILE_FIELDS = ["name", "department", "username", "email", "phone", "designation"];
 const PERSONAL_DOC_KEYS = ["aadhaar", "pan", "bank_passbook", "service_register", "joining_letter"];
@@ -74,7 +75,7 @@ const SIDEBAR_NAV_TARGETS = {
     "Assigned Students": "workloadCard",
     "My Workload": "workloadCard",
     "Apply Leave": "leaveCard",
-    "Profile": "roleWorkspaceCard",
+    "Profile": "profileCard",
     "My Tasks": "tasksCard",
     "Documents": "materialsCard"
 };
@@ -267,8 +268,81 @@ function renderRoleSidebar() {
     const modules = ROLE_SIDEBAR[role] || ROLE_SIDEBAR.STAFF;
     el.innerHTML = modules.map((m) => {
         const card = SIDEBAR_NAV_TARGETS[m] || "roleWorkspaceCard";
-        return `<li><button type="button" class="fd-link-btn" onclick="scrollToCard('${card}')">${m}</button></li>`;
+        return `<li><button type="button" class="fd-link-btn" data-card="${card}" onclick="scrollToCard('${card}')">${m}</button></li>`;
     }).join("");
+}
+
+function _allModuleCards() {
+    return Array.from(document.querySelectorAll(".fd-card[data-module]"));
+}
+
+function _moduleForCard(cardId) {
+    const el = document.getElementById(cardId);
+    return el?.dataset?.module || "overview";
+}
+
+function _cardAllowed(el) {
+    return String(el?.dataset?.allowed || "1") !== "0";
+}
+
+function _setCardAllowed(cardId, allowed) {
+    const el = document.getElementById(cardId);
+    if (!el) return;
+    el.dataset.allowed = allowed ? "1" : "0";
+}
+
+function _firstAllowedCardId() {
+    const card = _allModuleCards().find((el) => _cardAllowed(el));
+    return card?.id || "";
+}
+
+function activateModule(moduleKey, preferredCardId = "") {
+    const cards = _allModuleCards();
+    if (!cards.length) return;
+
+    const hasAllowedInModule = cards.some((c) => c.dataset.module === moduleKey && _cardAllowed(c));
+    if (!hasAllowedInModule) {
+        const fallback = _firstAllowedCardId();
+        if (!fallback) return;
+        const fallbackModule = _moduleForCard(fallback);
+        if (fallbackModule !== moduleKey) {
+            activateModule(fallbackModule, fallback);
+            return;
+        }
+    }
+
+    ACTIVE_MODULE = moduleKey;
+    cards.forEach((card) => {
+        const visible = card.dataset.module === moduleKey && _cardAllowed(card);
+        card.style.display = visible ? "" : "none";
+    });
+
+    const navButtons = Array.from(document.querySelectorAll("#roleSidebarMenu .fd-link-btn"));
+    navButtons.forEach((btn) => {
+        const cardId = btn.getAttribute("data-card") || "";
+        const btnModule = _moduleForCard(cardId);
+        btn.classList.toggle("active", btnModule === ACTIVE_MODULE);
+    });
+
+    const focusEl = preferredCardId ? document.getElementById(preferredCardId) : null;
+    if (focusEl && focusEl.style.display !== "none") {
+        focusEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        focusEl.classList.add("fd-card-focus");
+        setTimeout(() => focusEl.classList.remove("fd-card-focus"), 900);
+    }
+}
+
+function activateInitialModule() {
+    const firstBtn = document.querySelector("#roleSidebarMenu .fd-link-btn[data-card]");
+    if (firstBtn) {
+        const cardId = firstBtn.getAttribute("data-card");
+        if (cardId) {
+            scrollToCard(cardId);
+            return;
+        }
+    }
+    const fallback = _firstAllowedCardId();
+    if (fallback) activateModule(_moduleForCard(fallback), fallback);
 }
 
 function scrollToCard(cardId) {
@@ -277,14 +351,7 @@ function scrollToCard(cardId) {
         showToast("Section not found", true);
         return;
     }
-    // If hidden by previous permission state, reveal it so the Open action is visible.
-    const style = window.getComputedStyle(el);
-    if (style.display === "none") {
-        el.style.display = "";
-    }
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
-    el.classList.add("fd-card-focus");
-    setTimeout(() => el.classList.remove("fd-card-focus"), 900);
+    activateModule(_moduleForCard(cardId), cardId);
 }
 
 function renderQuickButtons() {
@@ -362,15 +429,25 @@ function renderRoleModuleVisibility() {
     const publicationCard = document.getElementById("publicationCard");
     const hodControlsCard = document.getElementById("hodControlsCard");
     const role = resolveRole();
+    _setCardAllowed("plannerCard", true);
+    _setCardAllowed("roleFeatureCardsCard", true);
+    _setCardAllowed("workloadCard", true);
+    _setCardAllowed("roleWorkspaceCard", true);
+    _setCardAllowed("profileCard", true);
+    _setCardAllowed("profilePhotoCard", true);
+    _setCardAllowed("profileSecurityCard", true);
+    _setCardAllowed("notificationsCard", true);
+    _setCardAllowed("leaveCard", true);
+    _setCardAllowed("academicOpsCard", role !== "STAFF");
+    _setCardAllowed("materialsCard", true);
+    _setCardAllowed("tasksCard", true);
+    _setCardAllowed("publicationCard", true);
+    _setCardAllowed("hodControlsCard", role === "HOD");
 
-    // Keep core role modules visible so dashboard cards/open buttons always work.
-    if (leaveCard) leaveCard.style.display = "";
-    if (academicOps) academicOps.style.display = role === "STAFF" ? "none" : "";
-    if (materialsCard) materialsCard.style.display = "";
-    if (tasksCard) tasksCard.style.display = "";
     if (hodWrap) hodWrap.style.display = role === "HOD" ? "" : "none";
-    if (publicationCard) publicationCard.style.display = "";
-    if (hodControlsCard) hodControlsCard.style.display = role === "HOD" ? "" : "none";
+    if (ACTIVE_MODULE) {
+        activateModule(ACTIVE_MODULE);
+    }
 }
 
 function renderHodControls() {
@@ -1070,6 +1147,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderPriorityAlerts();
     loadErpOverview();
     initDailyPlanner();
+    activateInitialModule();
 
     bindEnterAdvance(
         ["facultyEmail", "facultyPhone"],

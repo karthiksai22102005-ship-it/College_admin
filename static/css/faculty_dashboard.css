@@ -1117,6 +1117,13 @@ body.role-hod .fd-brand h1 {
     background: #fff6ef;
 }
 
+.fd-side-nav .fd-link-btn.active {
+    border-color: #efc9b1;
+    background: #fff0e4;
+    color: #7c2d12;
+    font-weight: 700;
+}
+
 .fd-shell-main {
     padding: 0 14px 16px;
 }

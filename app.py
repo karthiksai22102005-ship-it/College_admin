@@ -707,6 +707,19 @@ def ensure_faculty_schema_on_startup():
     rows = load_faculty_data(FACULTY_STORE)
     save_data(FACULTY_STORE, rows)
 
+
+def run_startup_bootstrap():
+    """
+    Ensure required directories/data schema exist when the app is loaded by WSGI servers
+    like gunicorn (Render uses gunicorn, so __main__ block won't run).
+    """
+    init_upload_dirs_on_startup()
+    ensure_faculty_schema_on_startup()
+
+
+# Run bootstrap during module import so deployment startup is consistent on Render.
+run_startup_bootstrap()
+
 # ======================================================
 # RUN
 # ======================================================

@@ -22,23 +22,23 @@ body {
     font-size: 16px;
     line-height: 1.35;
     background:
-        radial-gradient(circle at 0% 0%, #ffd9c1 0%, transparent 30%),
-        radial-gradient(circle at 100% 20%, #ffe4cf 0%, transparent 28%),
-        linear-gradient(135deg, #fff4ec 0%, #ffe7d7 100%);
+        radial-gradient(circle at 0% 0%, #ffe2cf 0%, transparent 34%),
+        radial-gradient(circle at 100% 15%, #ffe9d9 0%, transparent 30%),
+        linear-gradient(135deg, #fff8f4 0%, #ffefe3 100%);
 }
 
 .fd-topbar {
-    background: rgba(255, 255, 255, 0.92);
-    border-bottom: 1px solid #efcfbb;
+    background: rgba(255, 255, 255, 0.95);
+    border-bottom: 1px solid #efd8ca;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px 28px;
+    padding: 14px 22px;
     position: sticky;
     top: 0;
     z-index: 5;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 8px 20px rgba(168, 92, 52, 0.08);
+    backdrop-filter: blur(9px);
+    box-shadow: 0 10px 22px rgba(168, 92, 52, 0.07);
 }
 
 .fd-brand {
@@ -67,11 +67,11 @@ body {
 }
 
 .fd-page {
-    max-width: 1460px;
-    margin: 22px auto 42px;
+    max-width: 1420px;
+    margin: 18px auto 36px;
     padding: 0 22px;
     display: grid;
-    gap: 18px;
+    gap: 14px;
 }
 
 .fd-topbar-actions {
@@ -95,16 +95,16 @@ body {
 
 .fd-kpi-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(4, minmax(190px, 1fr));
+    gap: 12px;
 }
 
 .fd-kpi-card {
-    background: linear-gradient(135deg, #fff4eb 0%, #fff 100%);
-    border: 1px solid #f3d8c8;
-    border-radius: 14px;
-    padding: 14px 14px;
-    box-shadow: 0 8px 18px rgba(168, 92, 52, 0.08);
+    background: linear-gradient(180deg, #fffdfb 0%, #fff6f0 100%);
+    border: 1px solid #f1ddd1;
+    border-radius: 12px;
+    padding: 12px 13px;
+    box-shadow: 0 6px 14px rgba(168, 92, 52, 0.06);
 }
 
 .fd-kpi-card p {
@@ -118,22 +118,44 @@ body {
     color: #c9531d;
     border: none;
     padding: 0;
-    font-size: 1.35rem;
+    font-size: 1.18rem;
+    line-height: 1.25;
+    letter-spacing: 0.1px;
+}
+
+#kpiLastLogin {
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: #7a4d32;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .fd-card {
+    position: relative;
     background: linear-gradient(180deg, #ffffff 0%, #fff9f5 100%);
-    border: 1px solid #f3d8c8;
-    border-left: 7px solid var(--fd-orange);
-    border-radius: 18px;
-    padding: 20px 20px;
-    box-shadow: 0 10px 24px rgba(168, 92, 52, 0.08);
-    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    border: 1px solid #f1ddd1;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 8px 18px rgba(168, 92, 52, 0.06);
+    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.fd-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    border-radius: 14px 14px 0 0;
+    background: linear-gradient(90deg, var(--fd-orange) 0%, #f29a67 100%);
 }
 
 .fd-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 28px rgba(168, 92, 52, 0.12);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(168, 92, 52, 0.1);
 }
 
 .fd-card h3 {
@@ -147,7 +169,7 @@ body {
 .fd-main {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 18px;
+    gap: 14px;
     align-items: start;
 }
 
@@ -157,20 +179,20 @@ body {
 
 .fd-main-content {
     display: grid;
-    grid-template-columns: minmax(320px, 30%) minmax(0, 70%);
-    gap: 18px;
+    grid-template-columns: minmax(320px, 34%) minmax(0, 66%);
+    gap: 14px;
     align-items: stretch;
 }
 
 .fd-col {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 14px;
     align-content: start;
 }
 
 .fd-col .fd-card {
-    min-height: 110px;
+    min-height: 96px;
     height: auto;
 }
 
@@ -181,7 +203,7 @@ body {
 .fd-common-grid {
     display: grid;
     grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-    gap: 18px;
+    gap: 14px;
     align-items: stretch;
 }
 
@@ -214,9 +236,9 @@ body {
 
 .fd-grid {
     display: grid;
-    grid-template-columns: 140px 1fr;
-    gap: 10px;
-    margin-bottom: 10px;
+    grid-template-columns: 128px 1fr;
+    gap: 8px;
+    margin-bottom: 8px;
     align-items: center;
 }
 
@@ -231,8 +253,8 @@ textarea {
     width: 100%;
     border: 1px solid #e7c7b2;
     border-radius: 10px;
-    padding: 10px 12px;
-    font-size: 1rem;
+    padding: 9px 11px;
+    font-size: 0.95rem;
     background: #fffdfa;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -411,8 +433,8 @@ input[readonly] {
 .fd-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
-    margin-top: 10px;
+    gap: 8px;
+    margin-top: 8px;
 }
 
 .fd-photo-hint {
@@ -598,15 +620,15 @@ body.role-hod .fd-brand h1 {
 .fd-note {
     background: #fffaf7;
     border: 1px solid #f0d7c8;
-    border-radius: 14px;
-    padding: 14px 14px;
+    border-radius: 12px;
+    padding: 12px;
     box-shadow: 0 8px 16px rgba(168, 92, 52, 0.06);
 }
 .fd-notice-card {
     background: linear-gradient(180deg, #fffefe 0%, #fff7f2 100%);
     border: 1px solid #efc9b1;
-    border-radius: 14px;
-    padding: 12px 12px;
+    border-radius: 12px;
+    padding: 10px;
     box-shadow: 0 8px 16px rgba(168, 92, 52, 0.06);
 }
 .fd-notice-card.unread {
@@ -663,9 +685,9 @@ body.role-hod .fd-brand h1 {
 
 .fd-feature-card {
     border: 1px solid #efc9b1;
-    border-radius: 12px;
+    border-radius: 10px;
     background: linear-gradient(180deg, #fffefe 0%, #fff7f2 100%);
-    padding: 10px;
+    padding: 9px 10px;
 }
 
 .fd-feature-head {
@@ -896,10 +918,7 @@ body.role-hod .fd-brand h1 {
         gap: 10px;
     }
 
-    .fd-card {
-        padding: 12px;
-        border-left-width: 6px;
-    }
+    .fd-card { padding: 12px; }
 
     .fd-photo-wrap img {
         width: 90px;
@@ -952,9 +971,7 @@ body.role-hod .fd-brand h1 {
         gap: 12px;
     }
 
-    .fd-card {
-        padding: 14px;
-    }
+    .fd-card { padding: 13px; }
 }
 
 @media (max-width: 620px) {

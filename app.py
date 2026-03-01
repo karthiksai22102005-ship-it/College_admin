@@ -180,6 +180,35 @@ def _faculty_auth_guard():
     return None
 
 
+def _current_faculty_for_dashboard():
+    """
+    Resolve active faculty record for dashboard APIs.
+    Supports normal faculty sessions and admin impersonation mode.
+    """
+    role = session.get("role")
+    if role == "faculty":
+        return _get_current_faculty_by_session_username()
+
+    if role == "admin" and session.get("impersonate_faculty_id"):
+        target_id = session.get("impersonate_faculty_id")
+        rows = load_faculty_data(FACULTY_STORE)
+        return next((r for r in rows if r.get("faculty_id") == target_id), None)
+
+    return None
+
+
+@app.route("/faculty-me", methods=["GET"])
+def faculty_me():
+    faculty = _current_faculty_for_dashboard()
+    if not faculty:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+
+    payload = dict(faculty)
+    payload.pop("password", None)
+    payload.pop("password_hash", None)
+    return jsonify(payload)
+
+
 @app.route("/update-faculty-profile", methods=["POST"])
 def update_faculty_profile():
     denied = _faculty_auth_guard()

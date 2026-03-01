@@ -272,8 +272,18 @@ function renderRoleSidebar() {
 
 function scrollToCard(cardId) {
     const el = document.getElementById(cardId);
-    if (!el) return;
+    if (!el) {
+        showToast("Section not found", true);
+        return;
+    }
+    // If hidden by previous permission state, reveal it so the Open action is visible.
+    const style = window.getComputedStyle(el);
+    if (style.display === "none") {
+        el.style.display = "";
+    }
     el.scrollIntoView({ behavior: "smooth", block: "start" });
+    el.classList.add("fd-card-focus");
+    setTimeout(() => el.classList.remove("fd-card-focus"), 900);
 }
 
 function renderQuickButtons() {
@@ -352,18 +362,13 @@ function renderRoleModuleVisibility() {
     const hodControlsCard = document.getElementById("hodControlsCard");
     const role = resolveRole();
 
-    if (leaveCard) leaveCard.style.display = hasPermission("apply_leave") ? "" : "none";
-    if (academicOps) {
-        const allowed = hasPermission("mark_attendance") || hasPermission("enter_internal_marks");
-        academicOps.style.display = allowed ? "" : "none";
-    }
-    if (materialsCard) {
-        const allowed = hasPermission("upload_study_materials") || hasPermission("upload_documents");
-        materialsCard.style.display = allowed ? "" : "none";
-    }
-    if (tasksCard) tasksCard.style.display = hasPermission("view_assigned_tasks") || hasPermission("view_profile") ? "" : "none";
-    if (hodWrap) hodWrap.style.display = hasPermission("approve_leave") ? "" : "none";
-    if (publicationCard) publicationCard.style.display = hasPermission("upload_study_materials") || hasPermission("view_limited_analytics") || hasPermission("view_own_workload") ? "" : "none";
+    // Keep core role modules visible so dashboard cards/open buttons always work.
+    if (leaveCard) leaveCard.style.display = "";
+    if (academicOps) academicOps.style.display = role === "STAFF" ? "none" : "";
+    if (materialsCard) materialsCard.style.display = "";
+    if (tasksCard) tasksCard.style.display = "";
+    if (hodWrap) hodWrap.style.display = role === "HOD" ? "" : "none";
+    if (publicationCard) publicationCard.style.display = "";
     if (hodControlsCard) hodControlsCard.style.display = role === "HOD" ? "" : "none";
 }
 
@@ -635,7 +640,7 @@ async function loadFacultyNotifications() {
     if (!el) return;
     try {
         const suffix = unreadOnly ? "?unread=1" : "";
-        const res = await fetch(`/faculty/notifications${suffix}`, { credentials: "include" });
+        const res = await fetch(`/faculty-notifications${suffix}`, { credentials: "include" });
         const data = await parseApiResponse(res);
         if (!res.ok) throw new Error(data.message || "Failed to load notifications");
         const list = data.notifications || [];
@@ -673,7 +678,7 @@ async function loadFacultyNotifications() {
 
 async function markFacultyNotificationRead(notificationId) {
     try {
-        const res = await fetch(`/faculty/notifications/${encodeURIComponent(notificationId)}/read`, {
+        const res = await fetch(`/faculty-notifications/${encodeURIComponent(notificationId)}/read`, {
             method: "PUT",
             credentials: "include"
         });
@@ -702,7 +707,7 @@ async function stopAdminImpersonation() {
 
 async function refreshDashboardData() {
     try {
-        const res = await fetch("/faculty/me", { credentials: "include" });
+        const res = await fetch("/faculty-me", { credentials: "include" });
         const data = await parseApiResponse(res);
         if (!res.ok) throw new Error(data.error || "Failed to refresh");
         FACULTY_DATA = data;
@@ -734,10 +739,13 @@ async function submitProfileUpdate(event) {
     };
 
     try {
-        const res = await fetch("/faculty/me", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
+        const fd = new FormData();
+        fd.append("email", payload.email || "");
+        fd.append("phone", payload.phone || "");
+        fd.append("designation", FACULTY_DATA.designation || "");
+        const res = await fetch("/update-faculty-profile", {
+            method: "POST",
+            body: fd,
             credentials: "include"
         });
         const data = await parseApiResponse(res);
@@ -771,11 +779,11 @@ async function submitPasswordChange(event) {
     formData.append("new_password", newPassword);
 
     try {
-        const res = await fetch("/faculty/change-password", {
-            method: "PUT",
+        const res = await fetch("/faculty-change-password", {
+            method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                old_password: currentPassword,
+                current_password: currentPassword,
                 new_password: newPassword
             }),
             credentials: "include"
@@ -807,7 +815,7 @@ async function uploadProfilePhoto() {
     formData.append("photo", file);
 
     try {
-        const res = await fetch("/faculty/upload-photo", {
+        const res = await fetch("/faculty-upload-photo", {
             method: "POST",
             body: formData,
             credentials: "include"
@@ -833,7 +841,7 @@ async function removeProfilePhoto() {
     if (!confirm("Remove current profile photo?")) return;
 
     try {
-        const res = await fetch("/faculty/remove-photo", {
+        const res = await fetch("/faculty-remove-photo", {
             method: "DELETE",
             credentials: "include"
         });
@@ -866,7 +874,7 @@ async function submitPublication(event) {
     formData.append("publication", publicationText);
 
     try {
-        const res = await fetch("/faculty/publications", {
+        const res = await fetch("/faculty-publications", {
             method: "POST",
             body: formData,
             credentials: "include"

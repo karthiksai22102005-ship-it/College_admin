@@ -708,12 +708,41 @@ def ensure_faculty_schema_on_startup():
     save_data(FACULTY_STORE, rows)
 
 
+def ensure_users_dataset_on_startup():
+    users_data = load_data(USERS_STORE)
+    changed = False
+
+    if not isinstance(users_data, dict):
+        users_data = {"meta": {"version": 1}, "users": []}
+        changed = True
+
+    users_list = users_data.get("users")
+    if not isinstance(users_list, list):
+        users_data["users"] = []
+        users_list = users_data["users"]
+        changed = True
+
+    has_admin = any(str(user.get("user_id", "")).strip().upper() == "ADMIN001" for user in users_list if isinstance(user, dict))
+    if not has_admin:
+        users_list.append({
+            "user_id": "ADMIN001",
+            "role": "admin",
+            "password_hash": hash_password("admin123"),
+            "faculty_id": None,
+        })
+        changed = True
+
+    if changed:
+        save_data(USERS_STORE, users_data)
+
+
 def run_startup_bootstrap():
     """
     Ensure required directories/data schema exist when the app is loaded by WSGI servers
     like gunicorn (Render uses gunicorn, so __main__ block won't run).
     """
     init_upload_dirs_on_startup()
+    ensure_users_dataset_on_startup()
     ensure_faculty_schema_on_startup()
 
 

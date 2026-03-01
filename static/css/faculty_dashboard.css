@@ -697,6 +697,77 @@ body.role-hod .fd-brand h1 {
     margin-bottom: 8px;
 }
 
+.fd-planner-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.fd-planner-date-label {
+    margin: 0 0 4px;
+    color: #8f7a6c;
+    font-size: 0.8rem;
+}
+
+.fd-planner-chip {
+    border: 1px solid #efc9b1;
+    background: #fff9f4;
+    border-radius: 10px;
+    padding: 6px 10px;
+    min-width: 110px;
+    text-align: center;
+}
+
+.fd-planner-chip span {
+    display: block;
+    color: #8f7a6c;
+    font-size: 0.75rem;
+}
+
+.fd-planner-chip strong {
+    color: #7c2d12;
+    font-size: 1rem;
+}
+
+.fd-planner-shortcuts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.fd-planner-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.fd-planner-list li {
+    border: 1px solid #f0d7c8;
+    border-radius: 10px;
+    background: #fffaf7;
+    padding: 8px 10px;
+}
+
+.fd-planner-list label {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    color: #5b4638;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.fd-planner-list input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #c9531d;
+}
+
 .fd-card-focus {
     animation: fdCardPulse 0.9s ease;
 }

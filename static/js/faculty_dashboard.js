@@ -1,5 +1,6 @@
 
 let FACULTY_DATA = window.FACULTY_BOOTSTRAP || {};
+let PLANNER_SESSION_STARTED_AT = Date.now();
 
 const REQUIRED_PROFILE_FIELDS = ["name", "department", "username", "email", "phone", "designation"];
 const PERSONAL_DOC_KEYS = ["aadhaar", "pan", "bank_passbook", "service_register", "joining_letter"];
@@ -940,6 +941,51 @@ function closePhotoLightbox() {
     document.body.style.overflow = "";
 }
 
+function initDailyPlanner() {
+    const dateEl = document.getElementById("plannerTodayDate");
+    const clockEl = document.getElementById("plannerSessionClock");
+    const checklistWrap = document.getElementById("plannerChecklist");
+    if (!checklistWrap) return;
+
+    const now = new Date();
+    const dateKey = now.toISOString().slice(0, 10);
+    if (dateEl) {
+        dateEl.textContent = now.toLocaleDateString(undefined, {
+            weekday: "short",
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+        });
+    }
+
+    const plannerStorageKey = `faculty_planner_${FACULTY_DATA.username || "user"}_${dateKey}`;
+    let saved = {};
+    try {
+        saved = JSON.parse(localStorage.getItem(plannerStorageKey) || "{}");
+    } catch (e) {
+        saved = {};
+    }
+
+    checklistWrap.querySelectorAll("input[type='checkbox'][data-item]").forEach((cb) => {
+        const item = cb.getAttribute("data-item");
+        cb.checked = !!saved[item];
+        cb.addEventListener("change", () => {
+            saved[item] = cb.checked;
+            localStorage.setItem(plannerStorageKey, JSON.stringify(saved));
+        });
+    });
+
+    const tick = () => {
+        if (!clockEl) return;
+        const secs = Math.max(0, Math.floor((Date.now() - PLANNER_SESSION_STARTED_AT) / 1000));
+        const mm = String(Math.floor(secs / 60)).padStart(2, "0");
+        const ss = String(secs % 60).padStart(2, "0");
+        clockEl.textContent = `${mm}:${ss}`;
+    };
+    tick();
+    setInterval(tick, 1000);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     renderKpis();
     renderDocumentStatus();
@@ -1023,6 +1069,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderQuickButtons();
     renderPriorityAlerts();
     loadErpOverview();
+    initDailyPlanner();
 
     bindEnterAdvance(
         ["facultyEmail", "facultyPhone"],

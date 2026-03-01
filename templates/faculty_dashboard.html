@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faculty Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/faculty_dashboard.css') }}?v=20260301c">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/faculty_dashboard.css') }}?v=20260301d">
 </head>
 <body>
     <header class="fd-topbar">
@@ -124,6 +124,40 @@
                                 <button class="fd-btn" type="submit">Update Password</button>
                             </div>
                         </form>
+                    </section>
+
+                    <section class="fd-card" id="plannerCard">
+                        <h3>Daily Planner</h3>
+                        <div class="fd-planner-head">
+                            <div>
+                                <p class="fd-planner-date-label">Today</p>
+                                <strong id="plannerTodayDate">-</strong>
+                            </div>
+                            <div class="fd-planner-chip">
+                                <span>Session</span>
+                                <strong id="plannerSessionClock">00:00</strong>
+                            </div>
+                        </div>
+                        <div class="fd-planner-shortcuts">
+                            <button class="fd-btn fd-btn-soft" type="button" onclick="scrollToCard('leaveCard')">Leave</button>
+                            <button class="fd-btn fd-btn-soft" type="button" onclick="scrollToCard('academicOpsCard')">Attendance</button>
+                            <button class="fd-btn fd-btn-soft" type="button" onclick="scrollToCard('materialsCard')">Materials</button>
+                            <button class="fd-btn fd-btn-soft" type="button" onclick="scrollToCard('notificationsCard')">Notifications</button>
+                        </div>
+                        <ul class="fd-planner-list" id="plannerChecklist">
+                            <li>
+                                <label><input type="checkbox" data-item="profile"> Update profile details</label>
+                            </li>
+                            <li>
+                                <label><input type="checkbox" data-item="attendance"> Mark attendance/marks</label>
+                            </li>
+                            <li>
+                                <label><input type="checkbox" data-item="materials"> Upload today material/doc</label>
+                            </li>
+                            <li>
+                                <label><input type="checkbox" data-item="notifications"> Review notifications</label>
+                            </li>
+                        </ul>
                     </section>
                 </div>
 
@@ -315,6 +349,6 @@
     <script>
         window.FACULTY_BOOTSTRAP = {{ faculty | tojson }};
     </script>
-    <script src="{{ url_for('static', filename='js/faculty_dashboard.js') }}?v=20260301c"></script>
+    <script src="{{ url_for('static', filename='js/faculty_dashboard.js') }}?v=20260301d"></script>
 </body>
 </html>

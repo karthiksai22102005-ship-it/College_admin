@@ -6,7 +6,7 @@
     <title>College Admin Login</title>
 
     <!-- CSS -->
-    <link rel="stylesheet" href="/static/css/login.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
 
     <!-- Google Font (structure only, styling later) -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -70,7 +70,7 @@
         <section class="auth-container">
             <!-- Left Visual Panel (hidden on small screens) -->
             <div class="auth-visual">
-                <img src="/static/RCE logo.png" alt="Login Visual" class="visual-image">
+                <img src="{{ url_for('static', filename='RCE Logo.png') }}" alt="Login Visual" class="visual-image">
                 <div class="visual-content">
                     <h1 class="brand-title">AcharyaAnusandha</h1>
                     <p class="brand-subtitle">
@@ -154,7 +154,7 @@
 
 
     <!-- JS -->
-    <script src="/static/js/login.js"></script>
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
 
 </body>
 </html>

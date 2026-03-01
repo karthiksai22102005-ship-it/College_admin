@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>College Faculty Management</title>
-<link rel="stylesheet" href="/static/css/dashboard.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 </head>
 
 <body>
@@ -13,7 +13,7 @@
 <header class="topbar">
     <div class="topbar-inner">
         <div class="topbar-logo">
-            <img src="/static/RCE%20Logo.png" alt="College Logo">
+            <img src="{{ url_for('static', filename='RCE Logo.png') }}" alt="College Logo">
         </div>
         <h1>College Faculty Management</h1>
 
@@ -660,7 +660,7 @@
             <h3 style="margin-top:20px;">Profile Photo</h3>
 
             <div class="photo-upload-box">
-                <img id="facPhotoPreview" src="/static/default-user.png" alt="photo">
+                <img id="facPhotoPreview" src="{{ url_for('static', filename='default-user.png') }}" alt="photo">
                 <input type="file" id="facPhotoUpload" accept="image/*" onchange="previewPhoto()">
                 <button class="upload-btn" type="button" onclick="document.getElementById('facPhotoUpload').click()">
                     📷 Upload Photo
@@ -771,7 +771,7 @@
 
 </main>
 
-<script src="/static/js/dashboard.js?v=20260227a"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}?v=20260227a"></script>
 
 <!-- Admin profile photo lightbox -->
 <div id="adminPhotoLightbox" class="ad-lightbox" aria-hidden="true">

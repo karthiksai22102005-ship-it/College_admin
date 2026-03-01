@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faculty Dashboard</title>
-    <link rel="stylesheet" href="/static/css/faculty_dashboard.css?v=20260227e">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/faculty_dashboard.css') }}?v=20260227e">
 </head>
 <body>
     <header class="fd-topbar">
         <div class="fd-brand">
-            <img src="/static/RCE%20Logo.png" alt="College Logo">
+            <img src="{{ url_for('static', filename='RCE Logo.png') }}" alt="College Logo">
             <div>
                 <h1>Faculty Dashboard</h1>
                 <p>Personal Workspace</p>
@@ -55,7 +55,7 @@
                 <div class="fd-col fd-col-left">
                     <section class="fd-card fd-profile-header">
                         <div class="fd-photo-wrap">
-                            <img id="facultyPhotoPreview" src="{{ faculty.get('photo') or '/static/default-user.png' }}" alt="Faculty Photo">
+                            <img id="facultyPhotoPreview" src="{{ faculty.get('photo') or url_for('static', filename='default-user.png') }}" alt="Faculty Photo">
                         </div>
                         <div class="fd-header-meta">
                             <h2 id="facultyNameHeader">{{ faculty.get('name', '-') }}</h2>
@@ -315,6 +315,6 @@
     <script>
         window.FACULTY_BOOTSTRAP = {{ faculty | tojson }};
     </script>
-    <script src="/static/js/faculty_dashboard.js?v=20260227e"></script>
+    <script src="{{ url_for('static', filename='js/faculty_dashboard.js') }}?v=20260227e"></script>
 </body>
 </html>

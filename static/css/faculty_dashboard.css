@@ -1166,6 +1166,28 @@ body.role-hod .fd-brand h1 {
     gap: 14px;
 }
 
+.fd-layout-grid.fd-layout-focus-side {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.fd-layout-grid.fd-layout-focus-side .fd-layout-side {
+    max-width: 760px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.fd-layout-grid.fd-layout-focus-side .fd-layout-main {
+    display: none;
+}
+
+.fd-layout-grid.fd-layout-focus-main {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.fd-layout-grid.fd-layout-focus-main .fd-layout-side {
+    display: none;
+}
+
 .fd-layout-main,
 .fd-layout-side {
     display: grid;

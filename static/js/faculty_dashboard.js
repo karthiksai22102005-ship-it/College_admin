@@ -299,6 +299,9 @@ function _firstAllowedCardId() {
 function activateModule(moduleKey, preferredCardId = "") {
     const cards = _allModuleCards();
     if (!cards.length) return;
+    const layoutGrid = document.querySelector(".fd-layout-grid");
+    const mainWrap = document.querySelector(".fd-layout-main");
+    const sideWrap = document.querySelector(".fd-layout-side");
 
     const hasAllowedInModule = cards.some((c) => c.dataset.module === moduleKey && _cardAllowed(c));
     if (!hasAllowedInModule) {
@@ -316,6 +319,15 @@ function activateModule(moduleKey, preferredCardId = "") {
         const visible = card.dataset.module === moduleKey && _cardAllowed(card);
         card.style.display = visible ? "" : "none";
     });
+
+    // Avoid empty-left layout: when all visible cards are from right panel (e.g., profile),
+    // collapse into a single-column focused view.
+    if (layoutGrid && mainWrap && sideWrap) {
+        const mainVisible = Array.from(mainWrap.querySelectorAll(".fd-card[data-module]")).some((c) => c.style.display !== "none");
+        const sideVisible = Array.from(sideWrap.querySelectorAll(".fd-card[data-module]")).some((c) => c.style.display !== "none");
+        layoutGrid.classList.toggle("fd-layout-focus-side", !mainVisible && sideVisible);
+        layoutGrid.classList.toggle("fd-layout-focus-main", mainVisible && !sideVisible);
+    }
 
     const navButtons = Array.from(document.querySelectorAll("#roleSidebarMenu .fd-link-btn"));
     navButtons.forEach((btn) => {

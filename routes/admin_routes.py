@@ -30,11 +30,16 @@ EXPORT_PATH = os.path.join(BASE_DIR, "data", "exports", "faculty_export.xlsx")
 ALLOWED_PERSONAL_DOC_TYPES = {"aadhaar", "pan", "bank_passbook", "service_register", "joining_letter", "others"}
 ALLOWED_QUAL_DOC_TYPES = {"ssc_memo", "inter_memo", "btech_memo", "mtech_memo", "phd_memo", "others"}
 ALLOWED_PHOTO_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+OTHER_DEPARTMENT_CODE = "OTHER"
+OTHER_DEPARTMENT_NAME = "Other Units"
 
 
 def _resolve_department_code(raw_code):
     if not raw_code:
         return None
+    token = str(raw_code).strip().upper()
+    if token == OTHER_DEPARTMENT_CODE:
+        return OTHER_DEPARTMENT_CODE
     for code in get_department_codes():
         if code.lower() == str(raw_code).strip().lower():
             return code
@@ -226,16 +231,16 @@ def get_departments():
             code: {"teaching_count": 0, "non_teaching_count": 0}
             for code in get_department_codes()
         }
+        counts[OTHER_DEPARTMENT_CODE] = {"teaching_count": 0, "non_teaching_count": 0}
 
         for faculty in faculty_list:
             dept_code, _, staff_type = _normalize_faculty_shape(faculty)
-            if dept_code not in CANONICAL_DEPARTMENTS:
-                continue
+            bucket = dept_code if dept_code in CANONICAL_DEPARTMENTS else OTHER_DEPARTMENT_CODE
 
             if staff_type == "NON_TEACHING":
-                counts[dept_code]["non_teaching_count"] += 1
+                counts[bucket]["non_teaching_count"] += 1
             else:
-                counts[dept_code]["teaching_count"] += 1
+                counts[bucket]["teaching_count"] += 1
 
         departments = []
         for code in get_department_codes():
@@ -249,6 +254,18 @@ def get_departments():
                 "teaching_count": teaching_count,
                 "non_teaching_count": non_teaching_count,
                 "total_count": total_count,
+            })
+
+        other_teaching = counts[OTHER_DEPARTMENT_CODE]["teaching_count"]
+        other_non_teaching = counts[OTHER_DEPARTMENT_CODE]["non_teaching_count"]
+        other_total = other_teaching + other_non_teaching
+        if other_total > 0:
+            departments.append({
+                "department_code": OTHER_DEPARTMENT_CODE,
+                "department_name": OTHER_DEPARTMENT_NAME,
+                "teaching_count": other_teaching,
+                "non_teaching_count": other_non_teaching,
+                "total_count": other_total,
             })
 
         return jsonify({"departments": departments})
@@ -271,9 +288,13 @@ def get_department_faculty(department_code):
     teaching = []
     non_teaching = []
 
+    include_other = resolved_code == OTHER_DEPARTMENT_CODE
     for faculty in faculty_list:
         dept_code, _, staff_type = _normalize_faculty_shape(faculty)
-        if dept_code != resolved_code:
+        if include_other:
+            if dept_code in CANONICAL_DEPARTMENTS:
+                continue
+        elif dept_code != resolved_code:
             continue
         row = _department_faculty_item(faculty)
         if staff_type == "NON_TEACHING":
@@ -286,7 +307,7 @@ def get_department_faculty(department_code):
 
     return jsonify({
         "department_code": resolved_code,
-        "department_name": get_department_name(resolved_code),
+        "department_name": OTHER_DEPARTMENT_NAME if include_other else get_department_name(resolved_code),
         "teaching": teaching,
         "non_teaching": non_teaching,
     })

@@ -9,6 +9,7 @@ from copy import deepcopy
 from io import BytesIO
 from utils.storage_backend import path_to_storage_key, read_bytes
 from utils.rbac import normalize_role_from_designation, default_permissions_json_for_role, compute_experience_years
+from services.department_service import canonicalize_department_code, infer_staff_type_from_designation
 
 
 DEFAULT_PERSONAL_DOCUMENTS = {
@@ -344,6 +345,10 @@ def ensure_faculty_schema_record(record):
     if not normalized.get("permissions_json"):
         normalized["permissions_json"] = default_permissions_json_for_role(normalized["normalized_role"])
     normalized["experience_years"] = compute_experience_years(normalized.get("joining_date"))
+    if not normalized.get("department_code"):
+        normalized["department_code"] = canonicalize_department_code(normalized.get("department"))
+    if not normalized.get("staff_type"):
+        normalized["staff_type"] = infer_staff_type_from_designation(normalized.get("designation"))
 
     workload = normalized.get("workload")
     if not isinstance(workload, dict):
